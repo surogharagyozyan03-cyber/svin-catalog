@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="hy">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVIN - Ադմին Պանել</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        body {
+            background-color: #f4f6f9;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .admin-wrapper {
+            max-width: 1300px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .admin-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #fff;
+            padding: 20px 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            margin-bottom: 25px;
+        }
+
+        .admin-header h2 {
+            margin: 0;
+            color: #111;
+            font-size: 22px;
+        }
+
+        .btn-logout {
+            padding: 10px 18px;
+            background: #d9534f;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+
+        .btn-logout:hover {
+            background: #c9302c;
+        }
+
+        .admin-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 25px;
+            align-items: start;
+        }
+
+        @media (max-width: 950px) {
+            .admin-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .admin-card {
+            background: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .admin-card h3 {
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 18px;
+            color: #222;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 13px;
+            color: #444;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+            outline: none;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #222;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background: #28a745;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            background: #218838;
+        }
+
+        .btn-cancel-edit {
+            background: #6c757d;
+            display: none;
+            width: 100%;
+            padding: 10px;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+
+        .btn-cancel-edit:hover {
+            background: #5a6268;
+        }
+
+        .filter-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        @media (max-width: 600px) {
+            .filter-box {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .products-list-wrapper {
+            max-height: 520px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .products-list-wrapper::-webkit-scrollbar {
+            width: 6px;
+        }
+        .products-list-wrapper::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 3px;
+        }
+
+        .products-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .product-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid #eee;
+            padding: 12px;
+            border-radius: 6px;
+            background: #fafafa;
+            gap: 10px;
+        }
+
+        .product-item img {
+            width: 50px;
+            height: 50px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .product-info {
+            display: flex;
+            align-items: center;
+            flex: 1;
+            gap: 12px;
+        }
+
+        .product-details strong {
+            display: block;
+            font-size: 14px;
+            color: #222;
+        }
+
+        .product-details span {
+            font-size: 12px;
+            color: #666;
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 4px;
+            display: inline-block;
+            margin-top: 2px;
+        }
+
+        .product-date {
+            font-size: 11px;
+            color: #888;
+            display: block;
+            margin-top: 3px;
+        }
+
+        .product-price-action {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .product-price {
+            font-weight: bold;
+            color: #111;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-action {
+            border: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            color: white;
+            transition: opacity 0.2s;
+        }
+
+        .btn-action:hover {
+            opacity: 0.85;
+        }
+
+        .btn-edit { background: #0284c7; }
+        .btn-delete { background: #d9534f; }
+
+        .admin-pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 6px;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+
+        .page-btn {
+            padding: 6px 12px;
+            border: 1px solid #cbd5e1;
+            background: #fff;
+            color: #0f172a;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: bold;
+            transition: all 0.2s;
+        }
+
+        .page-btn:hover {
+            background: #f1f5f9;
+        }
+
+        .page-btn.active {
+            background: #0f172a;
+            color: #fff;
+            border-color: #0f172a;
+        }
+
+        .image-preview {
+            width: 100%;
+            height: 120px;
+            border: 1px dashed #ccc;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 8px;
+            background: #f9f9f9;
+            overflow: hidden;
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="admin-wrapper">
+        <div class="admin-header">
+            <h2><i class="fa-solid fa-gear"></i> Ադմինիստրատորի Պանել</h2>
+            <div>
+                <a href="index.html" style="margin-right: 15px; color: #333; text-decoration: none; font-weight: bold;">
+                    <i class="fa-solid fa-house"></i> Դեպի Կայք
+                </a>
+                <button onclick="logout()" class="btn-logout"><i class="fa-solid fa-right-from-bracket"></i> Ելք</button>
+            </div>
+        </div>
+
+        <div class="admin-grid">
+            <div class="admin-card">
+                <h3 id="formTitle"><i class="fa-solid fa-plus-circle"></i> Ավելացնել Ապրանք</h3>
+                
+                <form id="addProductForm">
+                    <input type="hidden" id="editProductId">
+                    
+                    <div class="form-group">
+                        <label for="prodName">Ապրանքի Անվանումը *</label>
+                        <input type="text" id="prodName" required placeholder="օր. Որսորդական Դանակ">
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="prodCategory">Բաժին *</label>
+                            <select id="prodCategory" required onchange="updateSubcategories()">
+                                <option value="">Ընտրեք...</option>
+                                <option value="weapons">Զենքեր</option>
+                                <option value="ammo">Փամփուշտ</option>
+                                <option value="gun_acc">Զենքի Համար</option>
+                                <option value="accessories">Պարագաներ</option>
+                                <option value="tuning">Արդիականացում</option>
+                                <option value="hunter">Որսորդի Պարագաներ</option>
+                                <option value="knives">Դանակներ</option>
+                                <option value="apparel">Հանդերձանք</option>
+                                <option value="fishing">Ձկնորսական</option>
+                                <option value="baits">Ձկնորսական Խայծեր</option>
+                                <option value="camping">Արշավային Պարագաներ</option>
+                                <option value="airsoft">Օդամղիչի Համար</option>
+                                <option value="safes">Կողպեք և Պահարան</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="prodSubCategory">Ենթաբաժին *</label>
+                            <select id="prodSubCategory" required>
+                                <option value="">Սկզբում ընտրեք բաժինը</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="prodPrice">Գինը (֏) *</label>
+                            <input type="number" id="prodPrice" required placeholder="օր. 15000">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="prodStatus">Առկայություն</label>
+                            <select id="prodStatus">
+                                <option value="in_stock">Առկա է</option>
+                                <option value="out_of_stock">Առկա չէ</option>
+                                <option value="on_order">Պատվերով</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="prodImage">Նկար (Upload File)</label>
+                        <input type="file" id="prodImage" accept="image/*" onchange="previewImage(event)">
+                        <div class="image-preview" id="imagePreview">
+                            <span style="color: #aaa; font-size: 12px;">Նկարը ընտրված չէ</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="prodDesc">Նկարագրություն</label>
+                        <textarea id="prodDesc" rows="3" placeholder="Մանրամասն նկարագրություն..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn-submit" id="submitBtn"><i class="fa-solid fa-check"></i> Պահպանել Ապրանքը</button>
+                    <button type="button" class="btn-cancel-edit" id="cancelEditBtn" onclick="resetForm()">Չեղարկել խմբագրումը</button>
+                </form>
+            </div>
+
+            <div class="admin-card">
+                <h3>
+                    <span><i class="fa-solid fa-boxes-stacked"></i> Ապրանքների Ցանկ (<span id="totalProducts">0</span>)</span>
+                </h3>
+
+                <div class="filter-box">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <input type="text" id="searchInput" placeholder="🔍 Փնտրել ըստ անվան..." oninput="currentPage = 1; filterAndRenderProducts()">
+                    </div>
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <select id="categoryFilter" onchange="currentPage = 1; filterAndRenderProducts()">
+                            <option value="">📁 Բոլոր բաժինները</option>
+                            <option value="weapons">Զենքեր</option>
+                            <option value="ammo">Փամփուշտ</option>
+                            <option value="gun_acc">Զենքի Համար</option>
+                            <option value="accessories">Պարագաներ</option>
+                            <option value="tuning">Արդիականացում</option>
+                            <option value="hunter">Որսորդի Պարագաներ</option>
+                            <option value="knives">Դանակներ</option>
+                            <option value="apparel">Հանդերձանք</option>
+                            <option value="fishing">Ձկնորսական</option>
+                            <option value="baits">Ձկնորսական Խայծեր</option>
+                            <option value="camping">Արշավային Պարագաներ</option>
+                            <option value="airsoft">Օդամղիչի Համար</option>
+                            <option value="safes">Կողպեք և Պահարան</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="products-list-wrapper">
+                    <div class="products-list" id="productsList"></div>
+                </div>
+
+                <div class="admin-pagination" id="adminPagination"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const subcategoriesData = {
+            weapons: ["Ողորկափող Հրազեն", "Ակոսափող Հրազեն", "Գազային Ատրճանակ", "Մարտական Ատրճանակ", "Ազդանշանային Ատրճանակ", "Օդաճնշիչ Ատրճանակ Co2", "Օդաճնշիչ Հրացան", "Օդաճնշիչ Հրացան PCP"],
+            ammo: ["Ողորկափող Փամփուշտ", "Ակոսափող Փամփուշտ", "Գազային Փամփուշտ", "Օդաճնշիչ Փամփուշտ", "Պարկուճներ, վառոդ և հրապատիճ", "Գործիքներ", "Կոտորակ - Գնդակ", "Պիժ Կոնտեյներ"],
+            gun_acc: ["Նշանոց Օպտիկական", "Փակ Բոցամարիչ", "Նշանոց Մեխանիկական", "Նշանոց Կալիմատոր", "Հարթակ և Հենակ", "Ամրակ Кронштейн", "Պահեստամասեր", "Պահեստատուփ", "Փողի Երկարացում-Սեղմում", "Լազերային Փամփուշտ", "Խզակոթ և Փողակալ", "Խզակոթի Ամորտիզատոր"],
+            accessories: ["Ատրճանակի Պատյան", "Փամփշտակալ", "Հրացանի Պատյան", "Հրացանի Գոտի", "Մաքրման Միջոցներ", "Յուղեր և Քիմիկատներ"],
+            tuning: ["MDT Արդիականացում", "MP-153 DLG", "MP-155 DLG", "Сайга DLG", "Ամերիկյան DLG", "Fabarm DLG", "Արդիականացում"],
+            hunter: ["Հեռադիտակ", "Թակարդներ", "Լապտեր", "Կանչ - Մանոկներ", "Լազեր", "Տեխնիկական Միջոցներ"],
+            knives: ["Բացվող շեղբով", "Ֆիքսված Շեղբով", "Ռուսական Պողպատից", "Դամասկ Պողպատից", "Գրպանի", "Կացին - Բահ - Մաչետե", "Դանակի Պատյան", "Դանակի պատրաստում"],
+            apparel: ["Համազգեստ", "Կոշիկ", "Շապիկ Բաճկոն Վերարկու", "Տաբատներ", "Քողարկող, Անձրևապաշտպան", "Ակնոցներ", "Գոտի . Ձեռնոց", "Գլխարկ, Դիմակ"],
+            fishing: ["Կարթաձող", "Ճախարակ", "Կարթաթելեր", "Հյուսած Կարթաթելեր", "Կեռիկներ", "Լողան Поплавок", "Ծանրոցներ", "Կերամաններ", "Ձկնորսական Զդանշան", "Ձկնորսական Պարագաներ", "Նավակներ Լաստեր"],
+            baits: ["Mepps", "Փայլախայծ - Блесна", "Ոբլեր -TsuYoki", "Հավելակերեր", "Այլ տեսակ - Բնական", "Այլ տեսակ - Արհեստական"],
+            camping: ["Ուսապարկ և Պայուսակ", "Քնապարկ և Վրան", "Բարձեր և Ներքնակներ", "Պաշտպանող Միջոցներ", "Պարագաներ"],
+            airsoft: ["Պահեստամաս Ատրճանակի", "Պահեստամաս Հրացանի", "Զսպանակ - Գազային", "Այլ տեսակ", "Սթրայքբոլ"],
+            safes: ["Կողպեք և Պահարան"]
+        };
+
+        let currentBase64Image = "";
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        let allProducts = [];
+
+        if (localStorage.getItem('isAdminLoggedIn') !== 'true') {
+            window.location.href = 'login.html';
+        }
+
+        function logout() {
+            localStorage.removeItem('isAdminLoggedIn');
+            window.location.href = 'login.html';
+        }
+
+        function updateSubcategories(selectedSubcategory = "") {
+            const catSelect = document.getElementById('prodCategory').value;
+            const subSelect = document.getElementById('prodSubCategory');
+            subSelect.innerHTML = '<option value="">Ընտրեք ենթաբաժինը...</option>';
+
+            if (catSelect && subcategoriesData[catSelect]) {
+                subcategoriesData[catSelect].forEach(sub => {
+                    const opt = document.createElement('option');
+                    opt.value = sub;
+                    opt.textContent = sub;
+                    if (sub === selectedSubcategory) opt.selected = true;
+                    subSelect.appendChild(opt);
+                });
+            }
+        }
+
+        function previewImage(event) {
+            const file = event.target.files[0];
+            const preview = document.getElementById('imagePreview');
+
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    currentBase64Image = e.target.result;
+                    preview.innerHTML = `<img src="${currentBase64Image}" alt="Preview">`;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // 1. Получение всех товаров с сервера
+        async function fetchProducts() {
+            try {
+                const res = await fetch('/api/products');
+                allProducts = await res.json();
+                filterAndRenderProducts();
+            } catch (err) {
+                console.error('Սխալ բեռնման ընթացքում:', err);
+            }
+        }
+
+        // 2. Добавление или Редактирование товара
+        document.getElementById('addProductForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const editId = document.getElementById('editProductId').value;
+            const name = document.getElementById('prodName').value;
+            const category = document.getElementById('prodCategory').value;
+            const subcategory = document.getElementById('prodSubCategory').value;
+            const price = document.getElementById('prodPrice').value;
+            const status = document.getElementById('prodStatus').value;
+            const description = document.getElementById('prodDesc').value;
+
+            const productData = {
+                name,
+                category,
+                subcategory,
+                price,
+                status,
+                description,
+                image: currentBase64Image || 'https://via.placeholder.com/150'
+            };
+
+            const isEditing = Boolean(editId);
+            const url = isEditing ? `/api/products/${editId}` : '/api/products';
+            const method = isEditing ? 'PUT' : 'POST';
+
+            try {
+                const res = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(productData)
+                });
+
+                const data = await res.json();
+                if (data.success) {
+                    alert(isEditing ? 'Ապրանքը հաջողությամբ թարմացվեց:' : 'Ապրանքը հաջողությամբ ավելացվեց:');
+                    resetForm();
+                    fetchProducts();
+                } else {
+                    alert('Սխալ պահպանման ընթացքում');
+                }
+            } catch (err) {
+                alert('Սերվերի սխալ');
+            }
+        });
+
+        function filterAndRenderProducts() {
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase();
+            const selectedCategory = document.getElementById('categoryFilter').value;
+            const listContainer = document.getElementById('productsList');
+
+            const filtered = allProducts.filter(p => {
+                const matchesName = (p.name || '').toLowerCase().includes(searchQuery);
+                const matchesCategory = selectedCategory === "" || p.category === selectedCategory;
+                return matchesName && matchesCategory;
+            });
+
+            document.getElementById('totalProducts').textContent = filtered.length;
+
+            if (filtered.length === 0) {
+                listContainer.innerHTML = `<p style="text-align: center; color: #888; margin: 20px 0;">Ապրանքներ չեն գտնվել</p>`;
+                document.getElementById('adminPagination').innerHTML = '';
+                return;
+            }
+
+            const totalPages = Math.ceil(filtered.length / itemsPerPage);
+            if (currentPage > totalPages) currentPage = totalPages;
+
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = startIndex + itemsPerPage;
+            const paginatedItems = filtered.slice(startIndex, endIndex);
+
+            listContainer.innerHTML = '';
+            paginatedItems.forEach(prod => {
+                const item = document.createElement('div');
+                item.className = 'product-item';
+
+                item.innerHTML = `
+                    <div class="product-info">
+                        <img src="${prod.image}" alt="${prod.name}">
+                        <div class="product-details">
+                            <strong>${prod.name}</strong>
+                            <span>${prod.subcategory || prod.category}</span>
+                            <span class="product-date"><i class="fa-regular fa-clock"></i> ${prod.created_at || ''}</span>
+                        </div>
+                    </div>
+                    <div class="product-price-action">
+                        <div class="product-price">${Number(prod.price).toLocaleString()} ֏</div>
+                        <div class="action-buttons">
+                            <button class="btn-action btn-edit" onclick="editProduct(${prod.id})" title="Խմբագրել"><i class="fa-solid fa-pen-to-square"></i></button>
+                            <button class="btn-action btn-delete" onclick="deleteProduct(${prod.id})" title="Հեռացնել"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+                listContainer.appendChild(item);
+            });
+
+            renderPagination(totalPages);
+        }
+
+        function renderPagination(totalPages) {
+            const paginationContainer = document.getElementById('adminPagination');
+            paginationContainer.innerHTML = '';
+
+            if (totalPages <= 1) return;
+
+            for (let i = 1; i <= totalPages; i++) {
+                const btn = document.createElement('button');
+                btn.className = `page-btn ${i === currentPage ? 'active' : ''}`;
+                btn.textContent = i;
+                btn.onclick = () => {
+                    currentPage = i;
+                    filterAndRenderProducts();
+                };
+                paginationContainer.appendChild(btn);
+            }
+        }
+
+        // Заполнение формы для редактирования
+        function editProduct(id) {
+            const product = allProducts.find(p => p.id === id);
+            if (!product) return;
+
+            document.getElementById('editProductId').value = product.id;
+            document.getElementById('prodName').value = product.name || '';
+            document.getElementById('prodCategory').value = product.category || '';
+            
+            updateSubcategories(product.subcategory);
+
+            document.getElementById('prodPrice').value = product.price || '';
+            document.getElementById('prodStatus').value = product.status || 'in_stock';
+            document.getElementById('prodDesc').value = product.description || '';
+
+            currentBase64Image = product.image || '';
+            const preview = document.getElementById('imagePreview');
+            if (currentBase64Image) {
+                preview.innerHTML = `<img src="${currentBase64Image}" alt="Preview">`;
+            } else {
+                preview.innerHTML = `<span style="color: #aaa; font-size: 12px;">Նկարը ընտրված չէ</span>`;
+            }
+
+            document.getElementById('formTitle').innerHTML = `<i class="fa-solid fa-pen-to-square"></i> Խմբագրել Ապրանքը (#${product.id})`;
+            document.getElementById('submitBtn').innerHTML = `<i class="fa-solid fa-check"></i> Թարմացնել Ապրանքը`;
+            document.getElementById('cancelEditBtn').style.display = 'block';
+
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Сброс формы в стандартный режим (создание товара)
+        function resetForm() {
+            document.getElementById('addProductForm').reset();
+            document.getElementById('editProductId').value = '';
+            currentBase64Image = "";
+            document.getElementById('imagePreview').innerHTML = `<span style="color: #aaa; font-size: 12px;">Նկարը ընտրված չէ</span>`;
+            
+            document.getElementById('formTitle').innerHTML = `<i class="fa-solid fa-plus-circle"></i> Ավելացնել Ապրանք`;
+            document.getElementById('submitBtn').innerHTML = `<i class="fa-solid fa-check"></i> Պահպանել Ապրանքը`;
+            document.getElementById('cancelEditBtn').style.display = 'none';
+
+            updateSubcategories();
+        }
+
+        // 3. Удаление товара с сервера
+        async function deleteProduct(id) {
+            if (confirm('Վստա՞հ եք, որ ցանկանում եք հեռացնել այս ապրանքը:')) {
+                try {
+                    const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
+                    const data = await res.json();
+                    if (data.success) {
+                        fetchProducts();
+                    }
+                } catch (err) {
+                    alert('Սխալ հեռացման ընթացքում');
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', fetchProducts);
+    </script>
+</body>
+</html>

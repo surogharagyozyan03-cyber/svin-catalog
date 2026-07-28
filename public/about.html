@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="hy">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Մեր մասին - SVIN</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .about-hero {
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), url('https://images.unsplash.com/photo-1595590424283-b8f17842773f?q=80&w=1200') center/cover;
+            color: #fff;
+            padding: 80px 20px;
+            text-align: center;
+        }
+        .about-hero h1 { font-size: 36px; margin-bottom: 15px; font-weight: 800; }
+        .about-hero p { font-size: 18px; max-width: 600px; margin: 0 auto; color: #ddd; }
+        
+        .about-content {
+            max-width: 1000px;
+            margin: 50px auto;
+            padding: 0 20px;
+        }
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            align-items: center;
+            margin-bottom: 60px;
+        }
+        .about-text h2 { font-size: 26px; margin-bottom: 20px; color: #111; }
+        .about-text p { font-size: 15px; color: #555; line-height: 1.7; margin-bottom: 15px; }
+        
+        .values-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 25px;
+            margin-top: 40px;
+        }
+        .value-card {
+            background: #f9f9f9;
+            border: 1px solid #eee;
+            border-radius: 12px;
+            padding: 30px 20px;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        .value-card:hover { transform: translateY(-5px); }
+        .value-card i { font-size: 36px; color: #111; margin-bottom: 15px; }
+        .value-card h3 { font-size: 18px; margin-bottom: 10px; color: #111; }
+        .value-card p { font-size: 13px; color: #666; line-height: 1.5; }
+    </style>
+</head>
+<body>
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+        <div class="top-bar-container">
+            <div class="top-info">
+                <span><i class="fa-solid fa-location-dot"></i> Արցախյան խճուղի 30, Goris, Armenia</span>
+                <span><a href="tel:043444787" style="color: inherit; text-decoration: none;"><i class="fa-solid fa-phone"></i> 043 444787</a></span>
+            </div>
+            <div class="top-socials">
+                <a href="https://www.facebook.com/SvinGoris/" target="_blank"><i class="fa-brands fa-facebook-f"></i></a>
+                <a href="https://www.instagram.com/svin_military_shop/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+                <a href="https://t.me/+37443444787" target="_blank"><i class="fa-brands fa-telegram"></i></a>
+                <a href="https://wa.me/37443444787" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN HEADER -->
+    <header class="main-header">
+        <div class="header-container">
+            <div class="header-left">
+                <div class="logo-wrapper">
+                    <a href="index.html">
+                        <img src="logo.png" alt="SVIN" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <span class="alt-logo" style="display: none;">ՍՎԻՆ</span>
+                    </a>
+                </div>
+            </div>
+
+            <nav class="main-nav">
+                <a href="about.html" class="active" style="font-weight: bold;">Մեր մասին</a>
+                <a href="contact.html">Կապ</a>
+            </nav>
+
+            <div class="header-right">
+                <a href="index.html" class="btn-search" style="padding: 8px 16px; border-radius: 6px; text-decoration: none; background: #111; color: #fff;">
+                    <i class="fa-solid fa-house"></i> Գլխավոր
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- HERO SECTION -->
+    <section class="about-hero">
+        <h1>Մեր Մասին</h1>
+        <p>Որսորդական և ռազմական հանդերձանքի, զենքի պարագաների մասնագիտացված խանութ Գորիսում</p>
+    </section>
+
+    <!-- MAIN CONTENT -->
+    <main class="about-content">
+        <div class="about-grid">
+            <div class="about-text">
+                <h2>ՍՎԻՆ — Որակ և Պրոֆեսիոնալիզմ</h2>
+                <p>«ՍՎԻՆ» խանութ-սրահը ներկայացնում է որսորդական, ռազմական և արշավային պարագաների լայն տեսականի: Մեր նպատակն է ապահովել մեր հաճախորդներին միայն բարձրորակ, փորձարկված և հուսալի ապրանքներով:</p>
+                <p>Մենք համագործակցում ենք առաջատար արտադրողների հետ՝ առաջարկելով լավագույն լուծումները ինչպես պրոֆեսիոնալների, այնպես էլ սիրողական որսորդների ու արշավականների համար:</p>
+            </div>
+            <div style="background: #eee; border-radius: 12px; height: 300px; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                <img src="logo.png" alt="SVIN Store" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.src='https://images.unsplash.com/photo-1595590424283-b8f17842773f?q=80&w=600'">
+            </div>
+        </div>
+
+        <h2 style="text-align: center; font-size: 28px; margin-bottom: 30px;">Ինչո՞ւ ընտրել մեզ</h2>
+        
+        <div class="values-grid">
+            <div class="value-card">
+                <i class="fa-solid fa-shield-halved"></i>
+                <h3>100% Օրիգինալ</h3>
+                <p>Երաշխավորված որակ և սերտիֆիկացված ապրանքներ:</p>
+            </div>
+            <div class="value-card">
+                <i class="fa-solid fa-boxes-packing"></i>
+                <h3>Լայն Տեսականի</h3>
+                <p>Զենքի պարագաներից մինչև արշավային հանդերձանք:</p>
+            </div>
+            <div class="value-card">
+                <i class="fa-solid fa-user-shield"></i>
+                <h3>Փորձառու Խորհրդատվություն</h3>
+                <p>Օգնում ենք ճիշտ ընտրություն կատարել յուրաքանչյուր հարցում:</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+        <div class="footer-main">
+            <div class="footer-container">
+                <div class="footer-col">
+                    <div class="footer-logo">ՍՎԻՆ</div>
+                    <p class="footer-desc">Որսորդական և ռազմական հանդերձանքի, զենքի պարագաների մասնագիտացված խանութ:</p>
+                    <div class="footer-socials">
+                        <a href="https://www.facebook.com/SvinGoris/" target="_blank"><i class="fa-brands fa-facebook-f"></i></a>
+                        <a href="https://www.instagram.com/svin_military_shop/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="https://t.me/+37443444787" target="_blank"><i class="fa-brands fa-telegram"></i></a>
+                        <a href="https://wa.me/37443444787" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-col">
+                    <h4>ԱՐԱԳ ՀՂՈՒՄՆԵՐ</h4>
+                    <ul>
+                        <li><a href="about.html">Մեր մասին</a></li>
+                        <li><a href="index.html#categories">Ապրանքներ</a></li>
+                        <li><a href="contact.html">Կապ</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col footer-col-wide">
+                    <h4>ԲԱԺԻՆՆԵՐ</h4>
+                    <div class="footer-categories-grid">
+                        <ul>
+                            <li><a href="category.html?cat=weapons">Զենքեր</a></li>
+                            <li><a href="category.html?cat=ammo">Փամփուշտ</a></li>
+                            <li><a href="category.html?cat=gun_acc">Զենքի Համար</a></li>
+                            <li><a href="category.html?cat=accessories">Պարագաներ</a></li>
+                            <li><a href="category.html?cat=tuning">Արդիականացում</a></li>
+                            <li><a href="category.html?cat=hunter">Որսորդի Պարագաներ</a></li>
+                            <li><a href="category.html?cat=knives">Դանակներ</a></li>
+                        </ul>
+                        <ul>
+                            <li><a href="category.html?cat=apparel">Հանդերձանք</a></li>
+                            <li><a href="category.html?cat=fishing">Ձկնորսական</a></li>
+                            <li><a href="category.html?cat=baits">Ձկնորսական Խայծեր</a></li>
+                            <li><a href="category.html?cat=camping">Արշավային Պարագաներ</a></li>
+                            <li><a href="category.html?cat=airsoft">Օդամղիչի Համար</a></li>
+                            <li><a href="category.html?cat=safes">Կողպեք և Պահարան</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="footer-col">
+                    <h4>ԿԱՊ</h4>
+                    <div class="contact-phone"><a href="tel:043444787" style="color: inherit; text-decoration: none;">043 444787</a></div>
+                    <p><i class="fa-solid fa-envelope"></i> millitaryshop@svin.am</p>
+                    <p><i class="fa-solid fa-location-dot"></i> Արցախյան խճուղի 30, Goris, Armenia</p>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 ՍՎԻՆ. Բոլոր իրավունքները պաշտպանված են:</p>
+        </div>
+    </footer>
+
+</body>
+</html>

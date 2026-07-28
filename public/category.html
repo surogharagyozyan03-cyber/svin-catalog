@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="hy">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVIN - Կատալոգ</title>
+
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <script src="search.js"></script>
+    <style>
+        /* Стили карточек товаров точно как в index.html */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 30px;
+        }
+
+        .product-card {
+            background: #ffffff;
+            border: 2px solid #cbd5e1;
+            border-radius: 16px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+            cursor: pointer;
+        }
+
+        .product-card:hover {
+            border-color: #0f172a;
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+        }
+
+        .product-image-wrap {
+            width: 100%;
+            height: 220px;
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding: 20px;
+            box-sizing: border-box;
+            border-bottom: 2px solid #cbd5e1;
+            overflow: hidden;
+        }
+
+        .product-card img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            transition: transform 0.3s ease;
+        }
+
+        .product-card:hover img {
+            transform: scale(1.05);
+        }
+
+        .product-top-info {
+            position: absolute;
+            top: 12px;
+            left: 12px;
+            right: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 2;
+        }
+
+        .badge-status {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 5px 10px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .badge-in_stock { background: #dcfce7; color: #166534; }
+        .badge-out_of_stock { background: #fee2e2; color: #991b1b; }
+        .badge-on_order { background: #fef3c7; color: #92400e; }
+
+        .price-tag {
+            background: #0f172a;
+            color: #ffffff;
+            font-size: 14px;
+            font-weight: 700;
+            padding: 6px 12px;
+            border-radius: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+        }
+
+        .product-content {
+            padding: 20px;
+            background: #ffffff;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .product-card h3 {
+            font-size: 16px;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0 0 8px 0;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-align: left;
+        }
+
+        .product-desc {
+            font-size: 13px;
+            color: #64748b;
+            margin: 0;
+            line-height: 1.4;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        /* Стили модального окна */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .modal-card {
+            background: #fff;
+            border-radius: 12px;
+            max-width: 600px;
+            width: 100%;
+            padding: 30px;
+            position: relative;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color: #777;
+        }
+
+        .modal-close:hover {
+            color: #000;
+        }
+
+        .modal-image {
+            width: 100%;
+            height: 250px;
+            object-fit: contain;
+            background: #f8fafc;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .modal-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 15px;
+        }
+
+        .modal-info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .modal-price {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0f172a;
+            background: #f1f5f9;
+            padding: 6px 14px;
+            border-radius: 8px;
+        }
+
+        .modal-description-title {
+            font-weight: 700;
+            font-size: 14px;
+            color: #0f172a;
+            margin-bottom: 8px;
+        }
+
+        .modal-description {
+            font-size: 14px;
+            color: #475569;
+            line-height: 1.6;
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #0f172a;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOP BAR -->
+    <div class="top-bar">
+        <div class="top-bar-container">
+            <div class="top-info">
+                <span><i class="fa-solid fa-location-dot"></i> Արցախյան խճուղի 30, Goris, Armenia</span>
+                <span><a href="tel:043444787" style="color: inherit; text-decoration: none;"><i class="fa-solid fa-phone"></i> 043 444787</a></span>
+            </div>
+            <div class="top-socials">
+                <a href="https://www.facebook.com/SvinGoris/" target="_blank"><i class="fa-brands fa-facebook-f"></i></a>
+                <a href="https://www.instagram.com/svin_military_shop/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+                <a href="https://t.me/+37443444787" target="_blank"><i class="fa-brands fa-telegram"></i></a>
+                <a href="https://wa.me/37443444787" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN HEADER -->
+    <header class="main-header">
+        <div class="header-container">
+            <div class="header-left">
+                <div class="logo-wrapper">
+                    <a href="index.html">
+                        <img src="logo.png" alt="SVIN" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <span class="alt-logo" style="display: none;">ՍՎԻՆ</span>
+                    </a>
+                </div>
+
+                <div class="dropdown">
+                    <button class="btn-categories" id="categoriesBtn" type="button">
+                        <i class="fa-solid fa-bars"></i>
+                        <span>Բաժիններ</span>
+                        <i class="fa-solid fa-chevron-down dropdown-arrow"></i>
+                    </button>
+
+                    <div class="dropdown-menu" id="categoriesMenu">
+                        <a href="category.html?cat=weapons" class="dropdown-item"><i class="fa-solid fa-crosshairs"></i> Զենքեր</a>
+                        <a href="category.html?cat=ammo" class="dropdown-item"><i class="fa-solid fa-boxes-stacked"></i> Փամփուշտ</a>
+                        <a href="category.html?cat=gun_acc" class="dropdown-item"><i class="fa-solid fa-bullseye"></i> Զենքի Համար</a>
+                        <a href="category.html?cat=accessories" class="dropdown-item"><i class="fa-solid fa-briefcase"></i> Պարագաներ</a>
+                        <a href="category.html?cat=tuning" class="dropdown-item"><i class="fa-solid fa-sliders"></i> Արդիականացում</a>
+                        <a href="category.html?cat=hunter" class="dropdown-item"><i class="fa-solid fa-binoculars"></i> Որսորդի Պարագաներ</a>
+                        <a href="category.html?cat=knives" class="dropdown-item"><i class="fa-solid fa-shield-halved"></i> Դանակներ</a>
+                        <a href="category.html?cat=apparel" class="dropdown-item"><i class="fa-solid fa-shirt"></i> Հանդերձանք</a>
+                        <a href="category.html?cat=fishing" class="dropdown-item"><i class="fa-solid fa-fish"></i> Ձկնորսական</a>
+                        <a href="category.html?cat=baits" class="dropdown-item"><i class="fa-solid fa-water"></i> Ձկնորսական Խայծեր</a>
+                        <a href="category.html?cat=camping" class="dropdown-item"><i class="fa-solid fa-campground"></i> Արշավային Պարագաներ</a>
+                        <a href="category.html?cat=airsoft" class="dropdown-item"><i class="fa-solid fa-wind"></i> Օդամղիչի Համար</a>
+                        <a href="category.html?cat=safes" class="dropdown-item"><i class="fa-solid fa-vault"></i> Կողպեք և Պահարան</a>
+                    </div>
+                </div>
+
+                <div class="search-box">
+                    <input type="text" placeholder="Որոնել...">
+                    <button class="btn-search"><i class="fa-solid fa-magnifying-glass"></i> Որոնել</button>
+                </div>
+            </div>
+
+            <nav class="main-nav">
+                <a href="about.html">Մեր մասին</a>
+                <a href="contact.html">Կապ</a>
+            </nav>
+
+            <div class="header-right">
+                <div class="user-actions">
+                    <a href="login.html" class="action-item">
+                        <i class="fa-regular fa-user"></i>
+                        <span>Մուտք</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- CONTENT SECTION -->
+    <section class="categories-section container" style="margin: 40px auto; padding: 0 15px;">
+        <div class="section-header" style="margin-bottom: 25px;">
+            <h2 id="categoryTitle">Բաժին</h2>
+            <p id="categorySubtitle">Ընտրեք ենթաբաժինը</p>
+        </div>
+
+        <div id="subcategoriesGrid" class="categories-grid"></div>
+    </section>
+
+    <!-- MODAL -->
+    <div class="modal-overlay" id="productModal" onclick="closeModalOnOutside(event)">
+        <div class="modal-card">
+            <button class="modal-close" onclick="closeModal()"><i class="fa-solid fa-xmark"></i></button>
+            <img id="modalImg" class="modal-image" src="" alt="">
+            <div id="modalTitle" class="modal-title"></div>
+            
+            <div class="modal-info-row">
+                <span id="modalCategoryTag" style="color: #64748b; font-size: 14px;"></span>
+                <span id="modalPrice" class="modal-price"></span>
+            </div>
+
+            <div class="modal-description-title">Նկարագրություն</div>
+            <div id="modalDescription" class="modal-description"></div>
+        </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+        <div class="footer-main">
+            <div class="footer-container">
+                <div class="footer-col">
+                    <div class="footer-logo">ՍՎԻՆ</div>
+                    <p class="footer-desc">Որսորդական և ռազմական հանդերձանքի, զենքի պարագաների մասնագիտացված խանութ:</p>
+                    <div class="footer-socials">
+                        <a href="https://www.facebook.com/SvinGoris/" target="_blank"><i class="fa-brands fa-facebook-f"></i></a>
+                        <a href="https://www.instagram.com/svin_military_shop/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="https://t.me/+37443444787" target="_blank"><i class="fa-brands fa-telegram"></i></a>
+                        <a href="https://wa.me/37443444787" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-col">
+                    <h4>ԱՐԱԳ ՀՂՈՒՄՆԵՐ</h4>
+                    <ul>
+                        <li><a href="about.html">Մեր մասին</a></li>
+                        <li><a href="index.html#categories">Ապրանքներ</a></li>
+                        <li><a href="contact.html">Կապ</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col footer-col-wide">
+                    <h4>ԲԱԺԻՆՆԵՐ</h4>
+                    <div class="footer-categories-grid">
+                        <ul>
+                            <li><a href="category.html?cat=weapons">Զենքեր</a></li>
+                            <li><a href="category.html?cat=ammo">Փամփուշտ</a></li>
+                            <li><a href="category.html?cat=gun_acc">Զենքի Համար</a></li>
+                            <li><a href="category.html?cat=accessories">Պարագաներ</a></li>
+                            <li><a href="category.html?cat=tuning">Արդիականացում</a></li>
+                            <li><a href="category.html?cat=hunter">Որսորդի Պարագաներ</a></li>
+                            <li><a href="category.html?cat=knives">Դանակներ</a></li>
+                        </ul>
+                        <ul>
+                            <li><a href="category.html?cat=apparel">Հանդերձանք</a></li>
+                            <li><a href="category.html?cat=fishing">Ձկնորսական</a></li>
+                            <li><a href="category.html?cat=baits">Ձկնորսական Խայծեր</a></li>
+                            <li><a href="category.html?cat=camping">Արշավային Պարագաներ</a></li>
+                            <li><a href="category.html?cat=airsoft">Օդամղիչի Համար</a></li>
+                            <li><a href="category.html?cat=safes">Կողպեք և Պահարան</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="footer-col">
+                    <h4>ԿԱՊ</h4>
+                    <div class="contact-phone"><a href="tel:043444787" style="color: inherit; text-decoration: none;">043 444787</a></div>
+                    <p><i class="fa-solid fa-envelope"></i> millitaryshop@svin.am</p>
+                    <p><i class="fa-solid fa-location-dot"></i> Արցախյան խճուղի 30, Goris, Armenia</p>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 ՍՎԻՆ. Բոլոր իրավունքները պաշտպանված են:</p>
+        </div>
+    </footer>
+
+    <script>
+        const categoriesData = {
+            weapons: { title: "Զենքեր", items: ["Ողորկափող Հրազեն", "Ակոսափող Հրազեն", "Գազային Ատրճանակ", "Մարտական Ատրճանակ", "Ազդանշանային Ատրճանակ", "Օդաճնշիչ Ատրճանակ Co2", "Օդաճնշիչ Հրացան", "Օդաճնշիչ Հրացան PCP"] },
+            ammo: { title: "Փամփուշտ", items: ["Ողորկափող Փամփուշտ", "Ակոսափող Փամփուշտ", "Գազային Փամփուշտ", "Օդաճնշիչ Փամփուշտ", "Պարկուճներ, վառոդ և հրապատիճ", "Գործիքներ", "Կոտորակ - Գնդակ", "Պիժ Կոնտեյներ"] },
+            gun_acc: { title: "Զենքի Համար", items: ["Նշանոց Օպտիկական", "Փակ Բոցամարիչ", "Նշանոց Մեխանիկական", "Նշանոց Կալիմատոր", "Հարթակ և Հենակ", "Ամրակ Кронштейн", "Պահեստամասեր", "Պահեստատուփ", "Փողի Երկարացում-Սեղմում", "Լազերային Փամփուշտ", "Խզակոթ և Փողակալ", "Խզակոթի Ամորտիզատոր"] },
+            accessories: { title: "Պարագաներ", items: ["Ատրճանակի Պատյան", "Փամփշտակալ", "Հրացանի Պատյան", "Հրացանի Գոտի", "Մաքրման Միջոցներ", "Յուղեր և Քիմիկատներ"] },
+            tuning: { title: "Արդիականացում", items: ["MDT Արդիականացում", "MP-153 DLG", "MP-155 DLG", "Сайга DLG", "Ամերիկյան DLG", "Fabarm DLG", "Արդիականացում"] },
+            hunter: { title: "Որսորդի Պարագաներ", items: ["Հեռադիտակ", "Թակարդներ", "Լապտեր", "Կանչ - Մանոկներ", "Լազեր", "Տեխնիկական Միջոցներ"] },
+            knives: { title: "Դանակներ", items: ["Բացվող շեղբով", "Ֆիքսված Շեղբով", "Ռուսական Պողպատից", "Դամասկ Պողպատից", "Գրպանի", "Կացին - Բահ - Մաչետե", "Դանակի Պատյան", "Դանակի պատրաստում"] },
+            apparel: { title: "Հանդերձանք", items: ["Համազգեստ", "Կոշիկ", "Շապիկ Բաճկոն Վերարկու", "Տաբատներ", "Քողարկող, Անձրևապաշտպան", "Ակնոցներ", "Գոտի . Ձեռնոց", "Գլխարկ, Դիմակ"] },
+            fishing: { title: "Ձկնորսական", items: ["Կարթաձող", "Ճախարակ", "Կարթաթելեր", "Հյուսած Կարթաթելեր", "Կեռիկներ", "Լողան Поплавок", "Ծանրոցներ", "Կերամաններ", "Ձկնորսական Զդանշան", "Ձկնորսական Պարագաներ", "Նավակներ Լաստեր"] },
+            baits: { title: "Ձկնորսական Խայծեր", items: ["Mepps", "Փայլախայծ - Блесна", "Ոբլեր -TsuYoki", "Հավելակերեր", "Այլ տեսակ - Բնական", "Այլ տեսակ - Արհեստական"] },
+            camping: { title: "Արշավային Պարագաներ", items: ["Ուսապարկ և Պայուսակ", "Քնապարկ և Վրան", "Բարձեր և Ներքնակներ", "Պաշտպանող Միջոցներ", "Պարագաներ"] },
+            airsoft: { title: "Օդամղիչի Համար", items: ["Պահեստամաս Ատրճանակի", "Պահեստամաս Հրացանի", "Զսպանակ - Գազային", "Այլ տեսակ", "Սթրայքբոլ"] },
+            safes: { title: "Կողպեք և Պահարան", items: ["Կողպեք և Պահարան"] }
+        };
+
+        const statusLabels = {
+            in_stock: 'Առկա է',
+            out_of_stock: 'Առկա չէ',
+            on_order: 'Պատվերով'
+        };
+
+        let allCategoryProducts = []; // Массив для хранения всех товаров категории
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Dropdown меню
+            const catBtn = document.getElementById('categoriesBtn');
+            const catMenu = document.getElementById('categoriesMenu');
+            const dropdownWrapper = catBtn ? catBtn.closest('.dropdown') : null;
+
+            if (catBtn && catMenu && dropdownWrapper) {
+                catBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    catMenu.classList.toggle('show');
+                    dropdownWrapper.classList.toggle('active');
+                });
+
+                document.addEventListener('click', (e) => {
+                    if (!dropdownWrapper.contains(e.target)) {
+                        catMenu.classList.remove('show');
+                        dropdownWrapper.classList.remove('active');
+                    }
+                });
+            }
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const currentCat = urlParams.get('cat') || 'weapons';
+            const categoryInfo = categoriesData[currentCat] || categoriesData.weapons;
+
+            document.getElementById('categoryTitle').textContent = categoryInfo.title;
+            document.title = `SVIN - ${categoryInfo.title}`;
+
+            const grid = document.getElementById('subcategoriesGrid');
+            document.getElementById('categorySubtitle').textContent = "Ընտրեք ենթաբաժինը";
+
+            // 1. Отрисовываем подкатегории
+            grid.className = "categories-grid";
+            grid.innerHTML = '';
+
+            categoryInfo.items.forEach(itemText => {
+                const card = document.createElement('div');
+                card.className = 'cat-card cat-item';
+                card.style.cursor = 'pointer';
+                card.innerHTML = `
+                    <div class="cat-icon"><i class="fa-solid fa-chevron-right"></i></div>
+                    <span class="cat-title">${itemText}</span>
+                `;
+                // При клике на подкатегорию фильтруем товары
+                card.onclick = () => filterBySubcategory(itemText);
+                grid.appendChild(card);
+            });
+
+            // 2. Подгружаем товары текущей категории
+            fetch('/api/products')
+                .then(res => res.json())
+                .then(allProducts => {
+                    allCategoryProducts = allProducts.filter(p => {
+                        return p.category === currentCat || 
+                            p.category === categoryInfo.title || 
+                            p.categoryId === currentCat;
+                    });
+
+                    renderProductsList(allCategoryProducts, "Բոլոր ապրանքները այս բաժնում");
+                })
+                .catch(err => console.error('Ошибка загрузки товаров:', err));
+        });
+
+        // Функция отрисовки товаров
+        function renderProductsList(products, titleText) {
+            let container = document.getElementById('productsSectionContainer');
+            
+            if (!container) {
+                const mainContainer = document.getElementById('subcategoriesGrid').parentElement;
+                container = document.createElement('div');
+                container.id = 'productsSectionContainer';
+                mainContainer.appendChild(container);
+            }
+
+            container.innerHTML = '';
+
+            if (products.length === 0) {
+                container.innerHTML = `<h3 style="margin-top: 30px; color: #888; text-align: center;">Այս ենթաբաժնում ապրանքներ չկան</h3>`;
+                return;
+            }
+
+            const headerWrapper = document.createElement('div');
+            headerWrapper.style.display = 'flex';
+            headerWrapper.style.justifyContent = 'space-between';
+            headerWrapper.style.alignItems = 'center';
+            headerWrapper.style.marginTop = '40px';
+            headerWrapper.style.marginBottom = '20px';
+
+            const productsHeader = document.createElement('h2');
+            productsHeader.className = 'section-title';
+            productsHeader.style.margin = '0';
+            productsHeader.textContent = titleText;
+
+            headerWrapper.appendChild(productsHeader);
+
+            // Если применен фильтр по подкатегории — добавляем кнопку "Показать все"
+            if (titleText !== "Բոլոր ապրանքները այս բաժնում") {
+                const resetBtn = document.createElement('button');
+                resetBtn.textContent = "Ցույց տալ բոլորը";
+                resetBtn.className = 'btn-secondary'; // используем стили кнопки из проекта
+                resetBtn.style.padding = '8px 16px';
+                resetBtn.style.cursor = 'pointer';
+                resetBtn.onclick = () => renderProductsList(allCategoryProducts, "Բոլոր ապրանքները այս բաժնում");
+                headerWrapper.appendChild(resetBtn);
+            }
+
+            const productsGrid = document.createElement('div');
+            productsGrid.className = 'products-grid';
+
+            products.forEach(prod => {
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.onclick = () => openModal(prod);
+
+                const statusKey = prod.status || 'in_stock';
+                card.innerHTML = `
+                    <div class="product-image-wrap">
+                        <div class="product-top-info">
+                            <span class="badge-status badge-${statusKey}">${statusLabels[statusKey] || 'Առկա է'}</span>
+                            <span class="price-tag">${Number(prod.price || 0).toLocaleString()} ֏</span>
+                        </div>
+                        <img src="${prod.image || 'logo.png'}" alt="${prod.name || ''}">
+                    </div>
+                    <div class="product-content">
+                        <div>
+                            <h3>${prod.name || ''}</h3>
+                            <p class="product-desc">${prod.description || ''}</p>
+                        </div>
+                    </div>
+                `;
+                productsGrid.appendChild(card);
+            });
+
+            container.appendChild(headerWrapper);
+            container.appendChild(productsGrid);
+        }
+
+        // Фильтрация товаров при клике на подкатегорию
+        function filterBySubcategory(subName) {
+            const filtered = allCategoryProducts.filter(p => {
+                return p.subcategory === subName || p.subCategory === subName;
+            });
+
+            renderProductsList(filtered, `Ենթաբաժին: ${subName}`);
+
+            // Плавная прокрутка к блоку с товарами
+            const container = document.getElementById('productsSectionContainer');
+            if (container) {
+                container.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function openModal(prod) {
+            const modal = document.getElementById('productModal');
+            if (!modal) return;
+
+            const categoryNamesMap = {
+                weapons: "Զենքեր", ammo: "Փամփուշտ", gun_acc: "Զենքի Համար",
+                accessories: "Պարագաներ", tuning: "Արդիականացում", hunter: "Որսորդի Պարագաներ",
+                knives: "Դանակներ", apparel: "Հանդերձանք", fishing: "Ձկնորսական",
+                baits: "Ձկնորսական Խայծեր", camping: "Արշավային Պարագաներ", airsoft: "Օդամղիչի Համար", safes: "Կողպեք և Պահարան"
+            };
+
+            let catKey = prod.category || prod.categoryId || '';
+            let catDisplay = categoryNamesMap[catKey] || catKey || 'Բաժին';
+
+            document.getElementById('modalImg').src = prod.image || 'logo.png';
+            document.getElementById('modalTitle').textContent = prod.name || '';
+            document.getElementById('modalCategoryTag').textContent = `Բաժին: ${catDisplay}`;
+            document.getElementById('modalPrice').textContent = prod.price ? `${Number(prod.price).toLocaleString()} ֏` : '0 ֏';
+            document.getElementById('modalDescription').textContent = prod.description || 'Այս ապրանքի համար նկարագրություն առկա չէ:';
+
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('productModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function closeModalOnOutside(event) {
+            const modal = document.getElementById('productModal');
+            if (event.target === modal) closeModal();
+        }
+    </script>
+</body>
+</html>

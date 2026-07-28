@@ -1,0 +1,119 @@
+document.addEventListener('DOMContentLoaded', () => {
+    const catBtn = document.getElementById('categoriesBtn');
+    const catMenu = document.getElementById('categoriesMenu');
+    const dropdownWrapper = catBtn ? catBtn.closest('.dropdown') : null;
+
+    if (catBtn && catMenu && dropdownWrapper) {
+        catBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            catMenu.classList.toggle('show');
+            dropdownWrapper.classList.toggle('active');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!dropdownWrapper.contains(e.target)) {
+                catMenu.classList.remove('show');
+                dropdownWrapper.classList.remove('active');
+            }
+        });
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const query = (urlParams.get('q') || '').trim();
+
+    const searchInput = document.getElementById('searchInput');
+    if (searchInput) {
+        searchInput.value = query;
+    }
+
+    const searchTitle = document.getElementById('searchTitle');
+    const searchSubtitle = document.getElementById('searchSubtitle');
+    const grid = document.getElementById('searchResultsGrid');
+
+    if (query) {
+        searchTitle.textContent = `Որոնում: "${query}"`;
+        
+        // Получение актуального списка продуктов с сервера
+        fetch('/api/products')
+            .then(res => res.json())
+            .then(products => {
+                const lowerQuery = query.toLowerCase();
+
+                const matchedProducts = products.filter(p => {
+                    const name = (p.name || '').toLowerCase();
+                    const desc = (p.description || '').toLowerCase();
+                    const cat = (p.category || '').toLowerCase();
+                    const subcat = (p.subcategory || '').toLowerCase();
+
+                    return name.includes(lowerQuery) || 
+                           desc.includes(lowerQuery) || 
+                           cat.includes(lowerQuery) || 
+                           subcat.includes(lowerQuery);
+                });
+
+                if (matchedProducts.length > 0) {
+                    searchSubtitle.textContent = `Գտնվել է ապրանք: ${matchedProducts.length}`;
+                    grid.innerHTML = '';
+
+                    matchedProducts.forEach(prod => {
+                        const card = document.createElement('div');
+                        card.className = 'product-card';
+                        
+                        card.addEventListener('click', () => {
+                            openModal(prod);
+                        });
+
+                        card.innerHTML = `
+                            <img src="${prod.image || 'logo.png'}" alt="${prod.name || ''}" onerror="this.src='logo.png'">
+                            <div class="product-content">
+                                <span class="product-category-tag">${prod.subcategory || prod.category || 'Ապրանք'}</span>
+                                <div class="product-title">${prod.name || ''}</div>
+                                <div class="product-footer">
+                                    <span class="product-price">${prod.price ? Number(prod.price).toLocaleString() : '0'} ֏</span>
+                                    <button class="btn-details" type="button">Տեսնել</button>
+                                </div>
+                            </div>
+                        `;
+                        grid.appendChild(card);
+                    });
+                } else {
+                    searchSubtitle.textContent = `Արդյունքներ չեն գտնվել`;
+                    grid.innerHTML = `
+                        <div class="no-results" style="grid-column: 1 / -1;">
+                            <i class="fa-solid fa-face-sad-tear"></i>
+                            <div>Ձեր որոնմանը համապատասխան ապրանքներ չեն գտնվել:</div>
+                        </div>
+                    `;
+                }
+            })
+            .catch(() => {
+                searchSubtitle.textContent = `Սխալ տվյալները ստանալիս`;
+            });
+    } else {
+        searchTitle.textContent = `Որոնման արդյունքներ`;
+        searchSubtitle.textContent = `Մուտքագրեք որոնման բառը վերևի դաշտում`;
+        grid.innerHTML = `
+            <div class="no-results" style="grid-column: 1 / -1;">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <div>Խնդրում ենք որոնման դաշտում գրել բառ և սեղմել «Որոնել»:</div>
+            </div>
+        `;
+    }
+
+    const searchBtn = document.getElementById('searchBtn');
+    if (searchBtn && searchInput) {
+        const performSearch = () => {
+            const val = searchInput.value.trim();
+            if (val) {
+                window.location.href = `search.html?q=${encodeURIComponent(val)}`;
+            }
+        };
+
+        searchBtn.addEventListener('click', performSearch);
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                performSearch();
+            }
+        });
+    }
+});

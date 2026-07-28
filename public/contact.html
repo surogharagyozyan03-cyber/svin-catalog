@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="hy">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Կապ - SVIN</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .contact-container {
+            max-width: 1100px;
+            margin: 50px auto;
+            padding: 0 20px;
+        }
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+        }
+        .contact-card {
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .contact-item i {
+            font-size: 22px;
+            color: #111;
+            background: #f0f0f0;
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+        .contact-item h4 { font-size: 14px; color: #888; margin-bottom: 4px; font-weight: normal; }
+        .contact-item p { font-size: 16px; font-weight: bold; color: #111; margin: 0; }
+        
+        .social-links { display: flex; gap: 10px; margin-top: 15px; }
+        .social-links a {
+            width: 40px;
+            height: 40px;
+            background: #111;
+            color: #fff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+        .social-links a:hover { background: #333; }
+
+        .map-wrapper {
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #e0e0e0;
+            height: 100%;
+            min-height: 380px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- TOP BAR -->
+        <div class="top-bar">
+            <div class="top-bar-container">
+                <div class="top-info">
+                    <span><i class="fa-solid fa-location-dot"></i> Արցախյան խճուղի 30, Goris, Armenia</span>
+                    <span><a href="tel:043444787" style="color: inherit; text-decoration: none;"><i class="fa-solid fa-phone"></i> 043 444787</a></span>
+                </div>
+                <div class="top-socials">
+                    <a href="https://www.facebook.com/SvinGoris/" target="_blank"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="https://www.instagram.com/svin_military_shop/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="https://t.me/+37443444787" target="_blank"><i class="fa-brands fa-telegram"></i></a>
+                    <a href="https://wa.me/37443444787" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
+                </div>
+            </div>
+        </div>
+
+    <!-- MAIN HEADER -->
+    <header class="main-header">
+        <div class="header-container">
+            <div class="header-left">
+                <div class="logo-wrapper">
+                    <a href="index.html">
+                        <img src="logo.png" alt="SVIN" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                        <span class="alt-logo" style="display: none;">ՍՎԻՆ</span>
+                    </a>
+                </div>
+            </div>
+
+            <nav class="main-nav">
+                <a href="about.html">Մեր մասին</a>
+                <a href="contact.html" class="active" style="font-weight: bold;">Կապ</a>
+            </nav>
+
+            <div class="header-right">
+                <a href="index.html" class="btn-search" style="padding: 8px 16px; border-radius: 6px; text-decoration: none; background: #111; color: #fff;">
+                    <i class="fa-solid fa-house"></i> Գլխավոր
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- CONTENT SECTION -->
+    <main class="contact-container">
+        <h1 style="font-size: 32px; font-weight: bold; margin-bottom: 30px;">Կապ մեզ հետ</h1>
+
+        <div class="contact-grid">
+            <!-- Информационная карточка -->
+            <div class="contact-card">
+                <h3 style="font-size: 20px; margin-bottom: 25px; border-bottom: 2px solid #111; padding-bottom: 10px; display: inline-block;">Կոնտակտային տվյալներ</h3>
+
+                <div class="contact-item">
+                    <i class="fa-solid fa-location-dot"></i>
+                    <div>
+                        <h4>Հասցե</h4>
+                        <p>Արցախյան խճուղի 30, Goris, Armenia</p>
+                    </div>
+                </div>
+
+                <div class="contact-item">
+                    <i class="fa-solid fa-phone"></i>
+                    <div>
+                        <h4>Հեռախոսահամար</h4>
+                        <p>043 444787</p>
+                    </div>
+                </div>
+
+                <div class="contact-item">
+                    <i class="fa-solid fa-envelope"></i>
+                    <div>
+                        <h4>Էլ. փոստ</h4>
+                        <p>millitaryshop@svin.am</p>
+                    </div>
+                </div>
+
+                <div class="contact-item">
+                    <i class="fa-solid fa-clock"></i>
+                    <div>
+                        <h4>Աշխատանքային ժամեր</h4>
+                        <p>Երկ - Շբթ: 09:00 - 19:00</p>
+                    </div>
+                </div>
+
+                <h4 style="margin-top: 30px; margin-bottom: 10px; font-size: 14px; color: #888;">Սոցիալական ցանցեր</h4>
+                <div class="social-links">
+                    <a href="https://www.facebook.com/SvinGoris/" target="_blank"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="https://www.instagram.com/svin_military_shop/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="https://t.me/+37443444787" target="_blank"><i class="fa-brands fa-telegram"></i></a>
+                    <a href="https://wa.me/37443444787" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
+                </div>
+            </div>
+
+            <!-- Интерактивная карта Google Maps -->
+            <div class="map-wrapper">
+                <iframe 
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3077.8548329803095!2d46.338!3d39.510!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0%3A0x0!2zMzk1MAnMDIuNCJOIDQ2wrAyMCcxNi44IkU!5e0!3m2!1shy!2sam!4v1620000000000!5m2!1shy!2sam" 
+                    width="100%" 
+                    height="100%" 
+                    style="border:0;" 
+                    allowfullscreen="" 
+                    loading="lazy">
+                </iframe>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+        <div class="footer-main">
+            <div class="footer-container">
+                <div class="footer-col">
+                    <div class="footer-logo">ՍՎԻՆ</div>
+                    <p class="footer-desc">Որսորդական և ռազմական հանդերձանքի, զենքի պարագաների մասնագիտացված խանութ:</p>
+                    <div class="footer-socials">
+                        <a href="https://www.facebook.com/SvinGoris/" target="_blank"><i class="fa-brands fa-facebook-f"></i></a>
+                        <a href="https://www.instagram.com/svin_military_shop/" target="_blank"><i class="fa-brands fa-instagram"></i></a>
+                        <a href="https://t.me/+37443444787" target="_blank"><i class="fa-brands fa-telegram"></i></a>
+                        <a href="https://wa.me/37443444787" target="_blank"><i class="fa-brands fa-whatsapp"></i></a>
+                    </div>
+                </div>
+
+                <div class="footer-col">
+                    <h4>ԱՐԱԳ ՀՂՈՒՄՆԵՐ</h4>
+                    <ul>
+                        <li><a href="about.html">Մեր մասին</a></li>
+                        <li><a href="index.html#categories">Ապրանքներ</a></li>
+                        <li><a href="contact.html">Կապ</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col footer-col-wide">
+                    <h4>ԲԱԺԻՆՆԵՐ</h4>
+                    <div class="footer-categories-grid">
+                        <ul>
+                            <li><a href="category.html?cat=weapons">Զենքեր</a></li>
+                            <li><a href="category.html?cat=ammo">Փամփուշտ</a></li>
+                            <li><a href="category.html?cat=gun_acc">Զենքի Համար</a></li>
+                            <li><a href="category.html?cat=accessories">Պարագաներ</a></li>
+                            <li><a href="category.html?cat=tuning">Արդիականացում</a></li>
+                            <li><a href="category.html?cat=hunter">Որսորդի Պարագաներ</a></li>
+                            <li><a href="category.html?cat=knives">Դանակներ</a></li>
+                        </ul>
+                        <ul>
+                            <li><a href="category.html?cat=apparel">Հանդերձանք</a></li>
+                            <li><a href="category.html?cat=fishing">Ձկնորսական</a></li>
+                            <li><a href="category.html?cat=baits">Ձկնորսական Խայծեր</a></li>
+                            <li><a href="category.html?cat=camping">Արշավային Պարագաներ</a></li>
+                            <li><a href="category.html?cat=airsoft">Օդամղիչի Համար</a></li>
+                            <li><a href="category.html?cat=safes">Կողպեք և Պահարան</a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="footer-col">
+                    <h4>ԿԱՊ</h4>
+                    <div class="contact-phone"><a href="tel:043444787" style="color: inherit; text-decoration: none;">043 444787</a></div>
+                    <p><i class="fa-solid fa-envelope"></i> millitaryshop@svin.am</p>
+                    <p><i class="fa-solid fa-location-dot"></i> Արցախյան խճուղի 30, Goris, Armenia</p>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2026 ՍՎԻՆ. Բոլոր իրավունքները պաշտպանված են:</p>
+        </div>
+    </footer>
+
+</body>
+</html>
