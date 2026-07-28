@@ -1,4 +1,35 @@
+// Глобальная функция открытия модального окна (чтобы вызывалась отовсюду)
+function openModal(prod) {
+    const modal = document.getElementById('productModal');
+    if (!modal) return;
+
+    const modalImg = document.getElementById('modalImage');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalCat = document.getElementById('modalCategory');
+    const modalDesc = document.getElementById('modalDescription');
+    const modalPrice = document.getElementById('modalPrice');
+
+    if (modalImg) modalImg.src = prod.image || 'logo.png';
+    if (modalTitle) modalTitle.textContent = prod.name || '';
+    if (modalCat) modalCat.textContent = prod.subcategory || prod.category || 'Ապրանք';
+    if (modalDesc) modalDesc.textContent = prod.description || '';
+    if (modalPrice) modalPrice.textContent = `${prod.price ? Number(prod.price).toLocaleString() : '0'} ֏`;
+
+    modal.classList.add('active'); // Или modal.style.display = 'flex'; в зависимости от твоих CSS-стилей
+    modal.style.display = 'flex';
+}
+
+// Функция закрытия модального окна
+function closeModal() {
+    const modal = document.getElementById('productModal');
+    if (modal) {
+        modal.classList.remove('active');
+        modal.style.display = 'none';
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
+    // --- 1. Выпадающее меню категорий ---
     const catBtn = document.getElementById('categoriesBtn');
     const catMenu = document.getElementById('categoriesMenu');
     const dropdownWrapper = catBtn ? catBtn.closest('.dropdown') : null;
@@ -18,17 +49,39 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // --- 2. Обработчики закрытия модального окна ---
+    const modal = document.getElementById('productModal');
+    const closeBtn = document.querySelector('.close-modal');
+
+    if (closeBtn) {
+        closeBtn.addEventListener('click', closeModal);
+    }
+
+    if (modal) {
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModal();
+            }
+        });
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            closeModal();
+        }
+    });
+
+    // --- 3. Поиск и отрисовка карточек ---
     const searchInput = document.getElementById('searchInput');
     const searchBtn = document.getElementById('searchBtn');
     const searchTitle = document.getElementById('searchTitle');
     const searchSubtitle = document.getElementById('searchSubtitle');
     const grid = document.getElementById('searchResultsGrid');
 
-    // Функция поиска и отрисовки результатов
     const runSearch = (queryText) => {
         const query = (queryText || '').trim();
 
-        if (!grid) return; // Если мы не на странице с сеткой результатов
+        if (!grid) return; // Если не на странице результатов
 
         if (!query) {
             if (searchTitle) searchTitle.textContent = `Որոնման արդյունքներ`;
@@ -69,10 +122,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         const card = document.createElement('div');
                         card.className = 'product-card';
                         
+                        // Клик по карточке открывает модальное окно
                         card.addEventListener('click', () => {
-                            if (typeof openModal === 'function') {
-                                openModal(prod);
-                            }
+                            openModal(prod);
                         });
 
                         card.innerHTML = `
@@ -104,7 +156,7 @@ document.addEventListener('DOMContentLoaded', () => {
             });
     };
 
-    // 1. Проверяем URL при загрузке страницы (?q=...)
+    // --- 4. Старт поиска из параметров URL ---
     const urlParams = new URLSearchParams(window.location.search);
     const initialQuery = urlParams.get('q') || '';
 
@@ -112,22 +164,18 @@ document.addEventListener('DOMContentLoaded', () => {
         searchInput.value = initialQuery;
     }
 
-    // Запускаем поиск по переданному параметру из URL
     runSearch(initialQuery);
 
-    // 2. Слушаем события ввода
+    // --- 5. Обработка ввода в инпут поиска ---
     if (searchBtn && searchInput) {
         const handleSearchAction = () => {
             const val = searchInput.value.trim();
             
-            // Если мы уже на странице search.html — ищем на месте без перезагрузки
             if (window.location.pathname.includes('search.html')) {
-                // Обновляем URL без перезагрузки страницы
                 const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?q=' + encodeURIComponent(val);
                 window.history.pushState({ path: newUrl }, '', newUrl);
                 runSearch(val);
             } else {
-                // Если мы на главной или другой странице — переходим на search.html
                 window.location.href = `search.html?q=${encodeURIComponent(val)}`;
             }
         };
