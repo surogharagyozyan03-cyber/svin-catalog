@@ -18,22 +18,32 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const query = (urlParams.get('q') || '').trim();
-
     const searchInput = document.getElementById('searchInput');
-    if (searchInput) {
-        searchInput.value = query;
-    }
-
+    const searchBtn = document.getElementById('searchBtn');
     const searchTitle = document.getElementById('searchTitle');
     const searchSubtitle = document.getElementById('searchSubtitle');
     const grid = document.getElementById('searchResultsGrid');
 
-    if (query) {
-        searchTitle.textContent = `Որոնում: "${query}"`;
-        
-        // Получение актуального списка продуктов с сервера
+    // Функция поиска и отрисовки результатов
+    const runSearch = (queryText) => {
+        const query = (queryText || '').trim();
+
+        if (!grid) return; // Если мы не на странице с сеткой результатов
+
+        if (!query) {
+            if (searchTitle) searchTitle.textContent = `Որոնման արդյունքներ`;
+            if (searchSubtitle) searchSubtitle.textContent = `Մուտքագրեք որոնման բառը վերևի դաշտում`;
+            grid.innerHTML = `
+                <div class="no-results" style="grid-column: 1 / -1;">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <div>Խնդրում ենք որոնման դաշտում գրել բառ և սեղմել «Որոնել»:</div>
+                </div>
+            `;
+            return;
+        }
+
+        if (searchTitle) searchTitle.textContent = `Որոնում: "${query}"`;
+
         fetch('/api/products')
             .then(res => res.json())
             .then(products => {
@@ -52,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
 
                 if (matchedProducts.length > 0) {
-                    searchSubtitle.textContent = `Գտնվել է ապրանք: ${matchedProducts.length}`;
+                    if (searchSubtitle) searchSubtitle.textContent = `Գտնվել է ապրանք: ${matchedProducts.length}`;
                     grid.innerHTML = '';
 
                     matchedProducts.forEach(prod => {
@@ -60,7 +70,9 @@ document.addEventListener('DOMContentLoaded', () => {
                         card.className = 'product-card';
                         
                         card.addEventListener('click', () => {
-                            openModal(prod);
+                            if (typeof openModal === 'function') {
+                                openModal(prod);
+                            }
                         });
 
                         card.innerHTML = `
@@ -77,7 +89,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         grid.appendChild(card);
                     });
                 } else {
-                    searchSubtitle.textContent = `Արդյունքներ չեն գտնվել`;
+                    if (searchSubtitle) searchSubtitle.textContent = `Արդյունքներ չեն գտնվել`;
                     grid.innerHTML = `
                         <div class="no-results" style="grid-column: 1 / -1;">
                             <i class="fa-solid fa-face-sad-tear"></i>
@@ -86,33 +98,44 @@ document.addEventListener('DOMContentLoaded', () => {
                     `;
                 }
             })
-            .catch(() => {
-                searchSubtitle.textContent = `Սխալ տվյալները ստանալիս`;
+            .catch(err => {
+                console.error("Search error:", err);
+                if (searchSubtitle) searchSubtitle.textContent = `Սխալ տվյալները ստանալիս`;
             });
-    } else {
-        searchTitle.textContent = `Որոնման արդյունքներ`;
-        searchSubtitle.textContent = `Մուտքագրեք որոնման բառը վերևի դաշտում`;
-        grid.innerHTML = `
-            <div class="no-results" style="grid-column: 1 / -1;">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <div>Խնդրում ենք որոնման դաշտում գրել բառ և սեղմել «Որոնել»:</div>
-            </div>
-        `;
+    };
+
+    // 1. Проверяем URL при загрузке страницы (?q=...)
+    const urlParams = new URLSearchParams(window.location.search);
+    const initialQuery = urlParams.get('q') || '';
+
+    if (searchInput) {
+        searchInput.value = initialQuery;
     }
 
-    const searchBtn = document.getElementById('searchBtn');
+    // Запускаем поиск по переданному параметру из URL
+    runSearch(initialQuery);
+
+    // 2. Слушаем события ввода
     if (searchBtn && searchInput) {
-        const performSearch = () => {
+        const handleSearchAction = () => {
             const val = searchInput.value.trim();
-            if (val) {
+            
+            // Если мы уже на странице search.html — ищем на месте без перезагрузки
+            if (window.location.pathname.includes('search.html')) {
+                // Обновляем URL без перезагрузки страницы
+                const newUrl = window.location.protocol + "//" + window.location.host + window.location.pathname + '?q=' + encodeURIComponent(val);
+                window.history.pushState({ path: newUrl }, '', newUrl);
+                runSearch(val);
+            } else {
+                // Если мы на главной или другой странице — переходим на search.html
                 window.location.href = `search.html?q=${encodeURIComponent(val)}`;
             }
         };
 
-        searchBtn.addEventListener('click', performSearch);
+        searchBtn.addEventListener('click', handleSearchAction);
         searchInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') {
-                performSearch();
+                handleSearchAction();
             }
         });
     }
