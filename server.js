@@ -2,15 +2,23 @@ const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const cors = require('cors');
+const session = require('express-session'); // Подключаем сессии
 
 const app = express();
 const db = new sqlite3.Database('database.db');
 
-// Настройки CORS и лимитов для приема изображений Base64
 app.use(cors());
 app.use(express.json({ limit: '15mb' }));
+app.use(express.urlencoded({ extended: true }));
 
-// Указываем папку public для всех статических файлов
+// Настройка сессий (хранение статуса входа админа)
+app.use(session({
+    secret: 'svin_secret_key_2026', // Секретный ключ сессии
+    resave: false,
+    saveUninitialized: false,
+    cookie: { maxAge: 24 * 60 * 60 * 1000 } // Сессия действует 24 часа
+}));
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Инициализация базы данных SQLite
@@ -30,19 +38,59 @@ db.serialize(() => {
     `);
 });
 
+// Middlware для проверки авторизации
+function requireAdmin(req, res, next) {
+    if (req.session && req.session.isAdmin) {
+        return next();
+    }
+    // Если пользователь не авторизован — перенаправляем на login.html
+    res.redirect('/login');
+}
+
 // --- МАРШРУТЫ СТРАНИЦ ---
 
+// Главная страница
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.get('/admin', (req, res) => {
+// Страница входа (login.html)
+app.get('/login', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+// Страница админки (доступна ТОЛЬКО после входа)
+app.get('/admin', requireAdmin, (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'admin.html'));
 });
 
-// --- API ЭНДПОИНТЫ ---
+// --- API АВТОРИЗАЦИИ ---
 
-// 1. Получить список всех товаров
+// Обработка формы логина
+app.post('/api/login', (req, res) => {
+    const { username, password } = req.body;
+
+    // ЗДЕСЬ УКАЖИТЕ ВАШИ ЛОГИН И ПАРОЛЬ:
+    const ADMIN_USER = 'admin';
+    const ADMIN_PASS = 'svin2026';
+
+    if (username === ADMIN_USER && password === ADMIN_PASS) {
+        req.session.isAdmin = true;
+        return res.json({ success: true, redirect: '/admin' });
+    } else {
+        return res.status(401).json({ error: 'Неверный логин или пароль' });
+    }
+});
+
+// Выход из системы
+app.get('/api/logout', (req, res) => {
+    req.session.destroy();
+    res.redirect('/login');
+});
+
+// --- API ЭНДПОИНТЫ ТОВАРОВ ---
+
+// Получить товары (доступно всем)
 app.get('/api/products', (req, res) => {
     db.all('SELECT * FROM products ORDER BY id DESC', [], (err, rows) => {
         if (err) {
@@ -53,10 +101,9 @@ app.get('/api/products', (req, res) => {
     });
 });
 
-// 2. Добавить новый товар
-app.post('/api/products', (req, res) => {
+// Добавить товар (Защищено)
+app.post('/api/products', requireAdmin, (req, res) => {
     const { name, price, status, category, subcategory, description, image } = req.body;
-    
     if (!name || !price) {
         return res.status(400).json({ error: 'Название и цена обязательны' });
     }
@@ -65,76 +112,33 @@ app.post('/api/products', (req, res) => {
         INSERT INTO products (name, price, status, category, subcategory, description, image) 
         VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
-    
-    db.run(
-        query, 
-        [
-            name, 
-            price, 
-            status || 'in_stock', 
-            category || '', 
-            subcategory || '', 
-            description || '', 
-            image || ''
-        ], 
-        function(err) {
-            if (err) {
-                console.error('Ошибка при сохранении товара:', err);
-                return res.status(500).json({ error: 'Ошибка при сохранении товара' });
-            }
-            res.json({ success: true, id: this.lastID });
-        }
-    );
+    db.run(query, [name, price, status || 'in_stock', category || '', subcategory || '', description || '', image || ''], function(err) {
+        if (err) return res.status(500).json({ error: 'Ошибка при сохранении' });
+        res.json({ success: true, id: this.lastID });
+    });
 });
 
-// 3. Обновить существующий товар по ID
-app.put('/api/products/:id', (req, res) => {
+// Обновить товар (Защищено)
+app.put('/api/products/:id', requireAdmin, (req, res) => {
     const { id } = req.params;
     const { name, price, status, category, subcategory, description, image } = req.body;
-
-    if (!name || !price) {
-        return res.status(400).json({ error: 'Название и цена обязательны' });
-    }
 
     const query = `
         UPDATE products 
         SET name = ?, price = ?, status = ?, category = ?, subcategory = ?, description = ?, image = ?
         WHERE id = ?
     `;
-
-    db.run(
-        query,
-        [
-            name,
-            price,
-            status || 'in_stock',
-            category || '',
-            subcategory || '',
-            description || '',
-            image || '',
-            id
-        ],
-        function (err) {
-            if (err) {
-                console.error('Ошибка при обновлении товара:', err);
-                return res.status(500).json({ error: 'Ошибка при обновлении товара' });
-            }
-            if (this.changes === 0) {
-                return res.status(404).json({ error: 'Товар не найден' });
-            }
-            res.json({ success: true });
-        }
-    );
+    db.run(query, [name, price, status || 'in_stock', category || '', subcategory || '', description || '', image || '', id], function(err) {
+        if (err) return res.status(500).json({ error: 'Ошибка при обновлении' });
+        res.json({ success: true });
+    });
 });
 
-// 4. Удалить товар по ID
-app.delete('/api/products/:id', (req, res) => {
+// Удалить товар (Защищено)
+app.delete('/api/products/:id', requireAdmin, (req, res) => {
     const { id } = req.params;
     db.run('DELETE FROM products WHERE id = ?', [id], function(err) {
-        if (err) {
-            console.error('Ошибка при удалении товара:', err);
-            return res.status(500).json({ error: 'Ошибка при удалении товара' });
-        }
+        if (err) return res.status(500).json({ error: 'Ошибка при удалении' });
         res.json({ success: true });
     });
 });
