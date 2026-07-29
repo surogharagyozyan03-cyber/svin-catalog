@@ -83,7 +83,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!input) return;
 
-        // Создаем выпадающий блок для подсказок внутри текущего .search-box
         let dropdown = box.querySelector('.live-search-results');
         if (!dropdown) {
             dropdown = document.createElement('div');
@@ -91,8 +90,17 @@ document.addEventListener('DOMContentLoaded', () => {
             box.appendChild(dropdown);
         }
 
-        // Загрузка товаров из localStorage
-        const allProducts = JSON.parse(localStorage.getItem('svin_products')) || [];
+        let allProducts = [];
+
+        // Получаем актуальные товары напрямую из SQLite сервера
+        fetch('/api/products')
+            .then(res => res.json())
+            .then(data => {
+                if (Array.isArray(data)) {
+                    allProducts = data;
+                }
+            })
+            .catch(err => console.error('Ошибка загрузки поисковых данных:', err));
 
         // Функция рендера результатов Live Search
         const handleLiveSearch = () => {
@@ -132,13 +140,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 `;
 
-                // Переход к товару при клике
                 item.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    
-                    const subTarget = prod.subcategory || prod.subCategory || '';
-                    const catTarget = prod.category || prod.categoryId || '';
-                    
+                    const subTarget = prod.subcategory || '';
+                    const catTarget = prod.category || '';
                     window.location.href = `subcategory.html?sub=${encodeURIComponent(subTarget)}&cat=${encodeURIComponent(catTarget)}&product=${encodeURIComponent(prod.id || prod.name)}`;
                 });
 
@@ -148,11 +153,9 @@ document.addEventListener('DOMContentLoaded', () => {
             dropdown.style.display = 'block';
         };
 
-        // События ввода текста
         input.addEventListener('input', handleLiveSearch);
         input.addEventListener('focus', handleLiveSearch);
 
-        // Правильное перенаправление при клике на «Որոնել» или Enter
         const executeSearchRedirect = () => {
             const query = input.value.trim();
             if (query) {
@@ -175,7 +178,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Закрытие списка подсказок при клике вне поля поиска
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.search-box')) {
             document.querySelectorAll('.live-search-results').forEach(el => {
