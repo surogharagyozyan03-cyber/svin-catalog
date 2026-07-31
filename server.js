@@ -2,21 +2,21 @@ const express = require('express');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
 const cors = require('cors');
-const session = require('express-session'); // Подключаем сессии
+const session = require('express-session');
 
 const app = express();
 const db = new sqlite3.Database('database.db');
 
 app.use(cors());
 app.use(express.json({ limit: '15mb' }));
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ limit: '15mb', extended: true }));
 
 // Настройка сессий (хранение статуса входа админа)
 app.use(session({
-    secret: 'svin_secret_key_2026', // Секретный ключ сессии
+    secret: 'svin_secret_key_2026',
     resave: false,
     saveUninitialized: false,
-    cookie: { maxAge: 24 * 60 * 60 * 1000 } // Сессия действует 24 часа
+    cookie: { maxAge: 24 * 60 * 60 * 1000 } // Сессия 24 часа
 }));
 
 app.use(express.static(path.join(__dirname, 'public')));
@@ -38,39 +38,37 @@ db.serialize(() => {
     `);
 });
 
-// Middlware для проверки авторизации
+// Middleware для проверки авторизации
 function requireAdmin(req, res, next) {
     if (req.session && req.session.isAdmin) {
         return next();
     }
-    // Если пользователь не авторизован — перенаправляем на login.html
-    res.redirect('/login');
+    res.status(401).json({ error: 'Unauthorized' });
 }
 
 // --- МАРШРУТЫ СТРАНИЦ ---
 
-// Главная страница
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Страница входа (login.html)
 app.get('/login', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });
 
-// Страница админки (доступна ТОЛЬКО после входа)
-app.get('/admin', requireAdmin, (req, res) => {
-    res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+app.get('/admin', (req, res) => {
+    if (req.session && req.session.isAdmin) {
+        res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+    } else {
+        res.redirect('/login');
+    }
 });
 
 // --- API АВТОРИЗАЦИИ ---
 
-// Обработка формы логина
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
 
-    // ЗДЕСЬ УКАЖИТЕ ВАШИ ЛОГИН И ПАРОЛЬ:
     const ADMIN_USER = 'admin';
     const ADMIN_PASS = 'svin2026';
 
@@ -82,7 +80,6 @@ app.post('/api/login', (req, res) => {
     }
 });
 
-// Выход из системы
 app.get('/api/logout', (req, res) => {
     req.session.destroy();
     res.redirect('/login');
@@ -90,7 +87,7 @@ app.get('/api/logout', (req, res) => {
 
 // --- API ЭНДПОИНТЫ ТОВАРОВ ---
 
-// Получить товары (доступно всем)
+// Получить все товары (доступно всем)
 app.get('/api/products', (req, res) => {
     db.all('SELECT * FROM products ORDER BY id DESC', [], (err, rows) => {
         if (err) {
@@ -113,7 +110,10 @@ app.post('/api/products', requireAdmin, (req, res) => {
         VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
     db.run(query, [name, price, status || 'in_stock', category || '', subcategory || '', description || '', image || ''], function(err) {
-        if (err) return res.status(500).json({ error: 'Ошибка при сохранении' });
+        if (err) {
+            console.error('Ошибка сохранения:', err);
+            return res.status(500).json({ error: 'Ошибка при сохранении' });
+        }
         res.json({ success: true, id: this.lastID });
     });
 });
@@ -129,7 +129,10 @@ app.put('/api/products/:id', requireAdmin, (req, res) => {
         WHERE id = ?
     `;
     db.run(query, [name, price, status || 'in_stock', category || '', subcategory || '', description || '', image || '', id], function(err) {
-        if (err) return res.status(500).json({ error: 'Ошибка при обновлении' });
+        if (err) {
+            console.error('Ошибка обновления:', err);
+            return res.status(500).json({ error: 'Ошибка при обновлении' });
+        }
         res.json({ success: true });
     });
 });
@@ -138,12 +141,15 @@ app.put('/api/products/:id', requireAdmin, (req, res) => {
 app.delete('/api/products/:id', requireAdmin, (req, res) => {
     const { id } = req.params;
     db.run('DELETE FROM products WHERE id = ?', [id], function(err) {
-        if (err) return res.status(500).json({ error: 'Ошибка при удалении' });
+        if (err) {
+            console.error('Ошибка удаления:', err);
+            return res.status(500).json({ error: 'Ошибка при удалении' });
+        }
         res.json({ success: true });
     });
 });
 
-// 404 - Перенаправление на главную
+// 404 - Перенаправление
 app.use((req, res) => {
     res.status(404).sendFile(path.join(__dirname, 'public', 'index.html'));
 });
@@ -152,8 +158,6 @@ app.use((req, res) => {
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`=========================================`);
-    console.log(`Сервер SVIN запущен!`);
-    console.log(`Главная страница: http://localhost:${PORT}`);
-    console.log(`Админ-панель:    http://localhost:${PORT}/admin.html`);
+    console.log(`Сервер SVIN запущен! PORT: ${PORT}`);
     console.log(`=========================================`);
 });

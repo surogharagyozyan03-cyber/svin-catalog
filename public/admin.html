@@ -333,7 +333,7 @@
         <div class="admin-header">
             <h2><i class="fa-solid fa-gear"></i> Ադմինիստրատորի Պանել</h2>
             <div>
-                <a href="index.html" style="margin-right: 15px; color: #333; text-decoration: none; font-weight: bold;">
+                <a href="/" style="margin-right: 15px; color: #333; text-decoration: none; font-weight: bold;">
                     <i class="fa-solid fa-house"></i> Դեպի Կայք
                 </a>
                 <button onclick="logout()" class="btn-logout"><i class="fa-solid fa-right-from-bracket"></i> Ելք</button>
@@ -475,13 +475,8 @@
         const itemsPerPage = 10;
         let allProducts = [];
 
-        if (localStorage.getItem('isAdminLoggedIn') !== 'true') {
-            window.location.href = 'login.html';
-        }
-
         function logout() {
-            localStorage.removeItem('isAdminLoggedIn');
-            window.location.href = 'login.html';
+            window.location.href = '/api/logout';
         }
 
         function updateSubcategories(selectedSubcategory = "") {
@@ -541,7 +536,7 @@
                 name,
                 category,
                 subcategory,
-                price,
+                price: parseFloat(price),
                 status,
                 description,
                 image: currentBase64Image || 'https://via.placeholder.com/150'
@@ -555,8 +550,15 @@
                 const res = await fetch(url, {
                     method: method,
                     headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include', // Передаем сессию сервера
                     body: JSON.stringify(productData)
                 });
+
+                if (res.status === 401) {
+                    alert('Ձեր սեսիան ավարտվել է: Խնդրում ենք նորից մուտք գործել:');
+                    window.location.href = '/login';
+                    return;
+                }
 
                 const data = await res.json();
                 if (data.success) {
@@ -564,9 +566,10 @@
                     resetForm();
                     fetchProducts();
                 } else {
-                    alert('Սխալ պահպանման ընթացքում');
+                    alert(data.error || 'Սխալ պահպանման ընթացքում');
                 }
             } catch (err) {
+                console.error('Save error:', err);
                 alert('Սերվերի սխալ');
             }
         });
@@ -643,7 +646,6 @@
             }
         }
 
-        // Заполнение формы для редактирования
         function editProduct(id) {
             const product = allProducts.find(p => p.id === id);
             if (!product) return;
@@ -673,7 +675,6 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        // Сброс формы в стандартный режим (создание товара)
         function resetForm() {
             document.getElementById('addProductForm').reset();
             document.getElementById('editProductId').value = '';
@@ -687,11 +688,20 @@
             updateSubcategories();
         }
 
-        // 3. Удаление товара с сервера
         async function deleteProduct(id) {
             if (confirm('Վստա՞հ եք, որ ցանկանում եք հեռացնել այս ապրանքը:')) {
                 try {
-                    const res = await fetch(`/api/products/${id}`, { method: 'DELETE' });
+                    const res = await fetch(`/api/products/${id}`, {
+                        method: 'DELETE',
+                        credentials: 'include'
+                    });
+
+                    if (res.status === 401) {
+                        alert('Ձեր սեսիան ավարտվել է: Խնդրում ենք նորից մուտք գործել:');
+                        window.location.href = '/login';
+                        return;
+                    }
+
                     const data = await res.json();
                     if (data.success) {
                         fetchProducts();
