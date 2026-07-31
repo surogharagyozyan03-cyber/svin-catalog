@@ -479,6 +479,18 @@
             window.location.href = '/api/logout';
         }
 
+        // Автоматическая проверка активной сессии
+        async function checkAuth() {
+            try {
+                const res = await fetch('/api/check-auth', { credentials: 'include' });
+                if (!res.ok) {
+                    window.location.href = '/login';
+                }
+            } catch (err) {
+                window.location.href = '/login';
+            }
+        }
+
         function updateSubcategories(selectedSubcategory = "") {
             const catSelect = document.getElementById('prodCategory').value;
             const subSelect = document.getElementById('prodSubCategory');
@@ -509,10 +521,10 @@
             }
         }
 
-        // 1. Получение всех товаров с сервера
+        // Получение списка всех товаров с передачей cookies
         async function fetchProducts() {
             try {
-                const res = await fetch('/api/products');
+                const res = await fetch('/api/products', { credentials: 'include' });
                 allProducts = await res.json();
                 filterAndRenderProducts();
             } catch (err) {
@@ -520,7 +532,7 @@
             }
         }
 
-        // 2. Добавление или Редактирование товара
+        // Сохранение / редактирование товара
         document.getElementById('addProductForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
@@ -550,7 +562,7 @@
                 const res = await fetch(url, {
                     method: method,
                     headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include', // Передаем сессию сервера
+                    credentials: 'include',
                     body: JSON.stringify(productData)
                 });
 
@@ -712,7 +724,10 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', fetchProducts);
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+            fetchProducts();
+        });
     </script>
 </body>
 </html>

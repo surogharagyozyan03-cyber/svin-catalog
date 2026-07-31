@@ -7,21 +7,32 @@ const session = require('express-session');
 const app = express();
 const db = new sqlite3.Database('database.db');
 
-app.use(cors());
-app.use(express.json({ limit: '15mb' }));
-app.use(express.urlencoded({ limit: '15mb', extended: true }));
+// Обязательно для правильной работы сессий через HTTPS на Render
+app.set('trust proxy', 1);
 
-// Настройка сессий (хранение статуса входа админа)
+app.use(cors({
+    origin: true,
+    credentials: true
+}));
+
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
+
+// Настройка сессий с поддержкой HTTPS на Render
 app.use(session({
     secret: 'svin_secret_key_2026',
-    resave: false,
+    resave: true,
     saveUninitialized: false,
-    cookie: { maxAge: 24 * 60 * 60 * 1000 } // Сессия 24 часа
+    cookie: { 
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 дней
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax'
+    }
 }));
 
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Инициализация базы данных SQLite
+// Инициализация базы данных
 db.serialize(() => {
     db.run(`
         CREATE TABLE IF NOT EXISTS products (
@@ -36,14 +47,19 @@ db.serialize(() => {
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )
     `);
+
+    const columns = ['category', 'subcategory', 'description', 'image', 'status'];
+    columns.forEach(col => {
+        db.run(`ALTER TABLE products ADD COLUMN ${col} TEXT`, (err) => {});
+    });
 });
 
-// Middleware для проверки авторизации
+// Middleware проверки прав админа
 function requireAdmin(req, res, next) {
     if (req.session && req.session.isAdmin) {
         return next();
     }
-    res.status(401).json({ error: 'Unauthorized' });
+    return res.status(401).json({ error: 'Unauthorized' });
 }
 
 // --- МАРШРУТЫ СТРАНИЦ ---
@@ -68,16 +84,24 @@ app.get('/admin', (req, res) => {
 
 app.post('/api/login', (req, res) => {
     const { username, password } = req.body;
-
-    const ADMIN_USER = 'admin';
-    const ADMIN_PASS = 'svin2026';
-
-    if (username === ADMIN_USER && password === ADMIN_PASS) {
+    if (username === 'admin' && password === 'svin2026') {
         req.session.isAdmin = true;
-        return res.json({ success: true, redirect: '/admin' });
+        req.session.save((err) => {
+            if (err) {
+                return res.status(500).json({ error: 'Ошибка сохранения сессии' });
+            }
+            res.json({ success: true, redirect: '/admin' });
+        });
     } else {
-        return res.status(401).json({ error: 'Неверный логин или пароль' });
+        res.status(401).json({ error: 'Неверный логин или пароль' });
     }
+});
+
+app.get('/api/check-auth', (req, res) => {
+    if (req.session && req.session.isAdmin) {
+        return res.json({ authenticated: true });
+    }
+    return res.status(401).json({ authenticated: false });
 });
 
 app.get('/api/logout', (req, res) => {
@@ -85,23 +109,22 @@ app.get('/api/logout', (req, res) => {
     res.redirect('/login');
 });
 
-// --- API ЭНДПОИНТЫ ТОВАРОВ ---
+// --- API ТОВАРОВ ---
 
-// Получить все товары (доступно всем)
 app.get('/api/products', (req, res) => {
     db.all('SELECT * FROM products ORDER BY id DESC', [], (err, rows) => {
         if (err) {
-            console.error('Ошибка при получении товаров:', err);
-            return res.status(500).json({ error: 'Ошибка сервера при получении товаров' });
+            console.error('Ошибка SELECT:', err);
+            return res.status(500).json({ error: err.message });
         }
-        res.json(rows);
+        res.json(rows || []);
     });
 });
 
-// Добавить товар (Защищено)
 app.post('/api/products', requireAdmin, (req, res) => {
     const { name, price, status, category, subcategory, description, image } = req.body;
-    if (!name || !price) {
+    
+    if (!name || price === undefined || price === null) {
         return res.status(400).json({ error: 'Название и цена обязательны' });
     }
 
@@ -109,16 +132,26 @@ app.post('/api/products', requireAdmin, (req, res) => {
         INSERT INTO products (name, price, status, category, subcategory, description, image) 
         VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
-    db.run(query, [name, price, status || 'in_stock', category || '', subcategory || '', description || '', image || ''], function(err) {
+    
+    const params = [
+        String(name), 
+        Number(price), 
+        status || 'in_stock', 
+        category || '', 
+        subcategory || '', 
+        description || '', 
+        image || ''
+    ];
+
+    db.run(query, params, function(err) {
         if (err) {
-            console.error('Ошибка сохранения:', err);
-            return res.status(500).json({ error: 'Ошибка при сохранении' });
+            console.error('Ошибка INSERT:', err);
+            return res.status(500).json({ error: err.message });
         }
         res.json({ success: true, id: this.lastID });
     });
 });
 
-// Обновить товар (Защищено)
 app.put('/api/products/:id', requireAdmin, (req, res) => {
     const { id } = req.params;
     const { name, price, status, category, subcategory, description, image } = req.body;
@@ -128,36 +161,43 @@ app.put('/api/products/:id', requireAdmin, (req, res) => {
         SET name = ?, price = ?, status = ?, category = ?, subcategory = ?, description = ?, image = ?
         WHERE id = ?
     `;
-    db.run(query, [name, price, status || 'in_stock', category || '', subcategory || '', description || '', image || '', id], function(err) {
+    
+    const params = [
+        String(name), 
+        Number(price), 
+        status || 'in_stock', 
+        category || '', 
+        subcategory || '', 
+        description || '', 
+        image || '', 
+        id
+    ];
+
+    db.run(query, params, function(err) {
         if (err) {
-            console.error('Ошибка обновления:', err);
-            return res.status(500).json({ error: 'Ошибка при обновлении' });
+            console.error('Ошибка UPDATE:', err);
+            return res.status(500).json({ error: err.message });
         }
         res.json({ success: true });
     });
 });
 
-// Удалить товар (Защищено)
 app.delete('/api/products/:id', requireAdmin, (req, res) => {
     const { id } = req.params;
     db.run('DELETE FROM products WHERE id = ?', [id], function(err) {
         if (err) {
-            console.error('Ошибка удаления:', err);
-            return res.status(500).json({ error: 'Ошибка при удалении' });
+            console.error('Ошибка DELETE:', err);
+            return res.status(500).json({ error: err.message });
         }
         res.json({ success: true });
     });
 });
 
-// 404 - Перенаправление
 app.use((req, res) => {
-    res.status(404).sendFile(path.join(__dirname, 'public', 'index.html'));
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Запуск сервера
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 app.listen(PORT, () => {
-    console.log(`=========================================`);
-    console.log(`Сервер SVIN запущен! PORT: ${PORT}`);
-    console.log(`=========================================`);
+    console.log(`Сервер SVIN запущен на порту ${PORT}`);
 });
